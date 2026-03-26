@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KTO TO POWIEDZIAŁ? – Retro Party Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0d0f;
+  --surface: #16151a;
+  --surface2: #1e1c24;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0eeff;
+  --muted: #7a7590;
+  --accent: #c8ff3e;
+  --accent2: #ff6b6b;
+  --accent3: #6baaff;
+  --gold: #ffcc44;
+  --r: 14px;
+  --r2: 20px;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 40% at 15% 15%, rgba(200,255,62,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 85% 80%, rgba(107,170,255,0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 680px;
+  padding: 40px 20px 80px;
+  animation: fadeIn 0.3s ease;
+}
+.screen.active { display: flex; flex-direction: column; gap: 20px; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.logo { text-align: center; margin-bottom: 8px; }
+.logo-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(200,255,62,0.1);
+  border: 1px solid rgba(200,255,62,0.2);
+  padding: 5px 14px;
+  border-radius: 99px;
+  margin-bottom: 16px;
+}
+.logo h1 {
+  font-size: clamp(28px, 8vw, 52px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1px;
+}
+.logo h1 em { font-style: normal; color: var(--accent); }
+.logo p { color: var(--muted); font-size: 14px; margin-top: 10px; line-height: 1.6; font-weight: 400; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 24px;
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+.input-group label { font-size: 13px; color: var(--muted); }
+input[type="text"], textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 13px 16px;
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 80px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: 99px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s ease;
+}
+.btn-primary { background: var(--accent); color: #0d0d0f; }
+.btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; filter: none; }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+.btn-ghost:hover { background: var(--surface2); }
+.btn-block { width: 100%; }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 99px;
+}
+.pill-green { background: rgba(200,255,62,0.12); color: var(--accent); border: 1px solid rgba(200,255,62,0.2); }
+.pill-blue  { background: rgba(107,170,255,0.12); color: var(--accent3); border: 1px solid rgba(107,170,255,0.2); }
+.pill-red   { background: rgba(255,107,107,0.12); color: var(--accent2); border: 1px solid rgba(255,107,107,0.2); }
+.pill-gold  { background: rgba(255,204,68,0.12); color: var(--gold); border: 1px solid rgba(255,204,68,0.2); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.player-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.player-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.player-name { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player-num  { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.question-bubble {
+  background: linear-gradient(135deg, rgba(200,255,62,0.08), rgba(200,255,62,0.03));
+  border: 1px solid rgba(200,255,62,0.2);
+  border-radius: var(--r2);
+  padding: 28px;
+  text-align: center;
+}
+.question-num { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+.question-text { font-size: clamp(18px, 4vw, 24px); font-weight: 800; line-height: 1.3; letter-spacing: -0.5px; }
+.answers-list { display: flex; flex-direction: column; gap: 10px; }
+.answer-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.answer-badge {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace; flex-shrink: 0;
+}
+.answer-text { font-size: 15px; line-height: 1.5; flex: 1; }
+.answer-author { font-size: 12px; color: var(--muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+.vote-grid { display: flex; flex-direction: column; gap: 8px; }
+.vote-option {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.18s;
+  text-align: left;
+  width: 100%;
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+}
+.vote-option:hover { border-color: var(--accent); background: rgba(200,255,62,0.05); }
+.vote-option.selected { border-color: var(--accent); background: rgba(200,255,62,0.1); }
+.vote-answer-text { font-size: 14px; line-height: 1.4; flex: 1; }
+.reveal-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.reveal-item.is-mine { border-color: var(--accent); background: rgba(200,255,62,0.06); }
+.reveal-votes { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.vote-chip {
+  font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+  background: rgba(107,170,255,0.15); color: var(--accent3); font-family: 'DM Mono', monospace;
+}
+.score-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.score-rank { font-size: 18px; font-weight: 900; color: var(--muted); min-width: 28px; }
+.score-rank.top { color: var(--gold); }
+.score-bar-wrap { flex: 1; }
+.score-bar { height: 6px; border-radius: 99px; background: rgba(200,255,62,0.15); overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.8s cubic-bezier(.16,1,.3,1); }
+.score-pts { font-size: 20px; font-weight: 900; color: var(--accent); font-family: 'DM Mono', monospace; min-width: 40px; text-align: right; }
+.link-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.link-url { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.copy-btn {
+  padding: 6px 12px;
+  background: rgba(107,170,255,0.15);
+  border: 1px solid rgba(107,170,255,0.25);
+  border-radius: 8px;
+  color: var(--accent3);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(107,170,255,0.25); }
+.divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+.row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.text-center { text-align: center; }
+.text-muted { color: var(--muted); font-size: 13px; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+.stat-num { font-size: 26px; font-weight: 900; }
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
+.warning-box {
+  background: rgba(255,204,68,0.08);
+  border: 1px solid rgba(255,204,68,0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: var(--gold);
+  line-height: 1.6;
+}
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--accent); color: #0d0d0f;
+  padding: 12px 24px; border-radius: 99px;
+  font-weight: 700; font-size: 14px;
+  z-index: 9999;
+  transition: transform 0.3s cubic-bezier(.16,1,.3,1);
+  pointer-events: none; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(200,255,62,0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.waiting-dots { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 20px; }
+.waiting-dots span {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+  animation: bounce 1.4s infinite ease-in-out;
+}
+.waiting-dots span:nth-child(2) { animation-delay: 0.2s; }
+.waiting-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1} }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- LOADING -->
+<div class="screen active" id="screen-loading" style="align-items:center;justify-content:center;min-height:100vh;">
+  <div class="spinner"></div>
+  <p class="text-muted" style="margin-top:12px;" id="loading-msg">Łączę z grą...</p>
+</div>
+
+<!-- LANDING (no game param) -->
+<div class="screen" id="screen-landing">
+  <div class="logo">
+    <div class="logo-tag">Party Game · Retro Edition</div>
+    <h1>KTO TO<br><em>POWIEDZIAŁ?</em></h1>
+    <p>Gra imprezowa dla zespołów developerskich.<br>Idealna na retrospektywę!</p>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div class="card-title">Moderator</div>
+    <p class="text-muted" style="margin-bottom:16px;">Stwórz sesję i udostępnij link zespołowi.</p>
+    <button class="btn btn-primary btn-block" onclick="goMod()">Utwórz grę →</button>
+  </div>
+  <div class="warning-box">
+    <strong>🎮 Jesteś graczem?</strong><br>
+    Poproś moderatora o link – ten ekran jest dla moderatora.
+  </div>
+</div>
+
+<!-- JOIN (player with game param) -->
+<div class="screen" id="screen-join">
+  <div class="logo">
+    <div class="logo-tag">Party Game · Retro Edition</div>
+    <h1>KTO TO<br><em>POWIEDZIAŁ?</em></h1>
+    <p>Odpowiadaj szczerze. Głosuj mądrze.<br>Bądź gotowy/a na ujawnienie 😏</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Dołącz do gry</div>
+    <div class="input-group">
+      <label>Twoje imię lub pseudonim</label>
+      <input type="text" id="player-name-input" placeholder="np. Wiktor, Kasia, DevNinja..." maxlength="20" />
+    </div>
+    <div style="height:12px;"></div>
+    <button class="btn btn-primary btn-block" onclick="joinGame()">Dołącz do gry →</button>
+  </div>
+  <div class="warning-box">
+    <strong>🎮 Jak to działa?</strong><br>
+    Odpowiadasz krótko i szczerze. Inni gracze głosują zgadując kto to napisał – ale widzą tylko Twój numer, nie imię. Punkty za odgadnięcie i za zmylenie innych!
+  </div>
+</div>
+
+<!-- WAITING (player lobby) -->
+<div class="screen" id="screen-waiting">
+  <div class="logo">
+    <div class="logo-tag">Lobby</div>
+    <h1>KTO TO<br><em>POWIEDZIAŁ?</em></h1>
+  </div>
+  <div class="card">
+    <div class="row" style="margin-bottom:16px;">
+      <div class="card-title" style="margin:0;flex:1;">Gracze w lobby</div>
+      <div class="pill pill-green"><span class="dot"></span> <span id="waiting-count">0</span> online</div>
+    </div>
+    <div class="player-grid" id="waiting-players"></div>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div class="waiting-dots"><span></span><span></span><span></span></div>
+    <p class="text-muted">Czekamy na moderatora...<br>Gra zacznie się automatycznie.</p>
+  </div>
+</div>
+
+<!-- QUESTION (player) -->
+<div class="screen" id="screen-question">
+  <div class="row">
+    <div class="pill pill-green"><span class="dot"></span> LIVE</div>
+    <div class="pill pill-blue" id="q-counter-pill">Pytanie 1/10</div>
+    <div class="flex-1"></div>
+    <div id="my-num-pill" class="pill pill-gold"></div>
+  </div>
+  <div class="question-bubble">
+    <div class="question-num" id="q-num-label">PYTANIE 01</div>
+    <div class="question-text" id="q-text"></div>
+  </div>
+  <div class="card" id="answer-section">
+    <div class="card-title">Twoja odpowiedź</div>
+    <textarea id="player-answer" placeholder="Odpowiedz szczerze... nikt nie zobaczy Twojego imienia 😉" rows="3" maxlength="200"></textarea>
+    <div style="height:12px;"></div>
+    <button class="btn btn-primary btn-block" id="submit-answer-btn" onclick="submitAnswer()">Wyślij odpowiedź →</button>
+  </div>
+  <div class="card" id="answer-sent-section" style="display:none;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;">✓</div>
+    <p style="font-weight:700;font-size:16px;margin-bottom:4px;">Odpowiedź wysłana!</p>
+    <p class="text-muted" id="answers-so-far">Czekamy na pozostałych...</p>
+  </div>
+</div>
+
+<!-- VOTING (player) -->
+<div class="screen" id="screen-voting">
+  <div class="row">
+    <div class="pill pill-gold">🗳️ GŁOSOWANIE</div>
+    <div class="flex-1"></div>
+    <div id="my-num-pill-v" class="pill pill-gold"></div>
+  </div>
+  <div class="question-bubble">
+    <div class="question-num" id="v-q-num">PYTANIE 01</div>
+    <div class="question-text" id="v-q-text"></div>
+  </div>
+  <div class="card" id="voting-card">
+    <div class="card-title">Zgadnij – kto to napisał?</div>
+    <p class="text-muted" style="margin-bottom:14px;font-size:13px;">Widzisz numery, nie imiona. Na kogo głosujesz?</p>
+    <div class="vote-grid" id="vote-options"></div>
+  </div>
+  <div class="card" id="voted-section" style="display:none;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;">🗳️</div>
+    <p style="font-weight:700;font-size:16px;margin-bottom:4px;">Głos oddany!</p>
+    <p class="text-muted">Czekamy na resztę graczy...</p>
+  </div>
+</div>
+
+<!-- REVEAL (player) -->
+<div class="screen" id="screen-reveal">
+  <div class="pill pill-blue" style="width:fit-content;">🎭 UJAWNIENIE</div>
+  <div class="question-bubble">
+    <div class="question-num" id="r-q-num">PYTANIE 01</div>
+    <div class="question-text" id="r-q-text"></div>
+  </div>
+  <div id="reveal-list" class="answers-list"></div>
+  <div class="card" style="text-align:center;">
+    <p class="text-muted">Czekamy na kolejne pytanie od moderatora...</p>
+    <div class="waiting-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<!-- SCORES (player) -->
+<div class="screen" id="screen-scores">
+  <div class="logo">
+    <div class="logo-tag">Wyniki rundy</div>
+    <h1>⭐ SCORE<br><em>BOARD</em></h1>
+  </div>
+  <div class="card" id="scores-list-p"></div>
+  <div class="card" style="text-align:center;">
+    <p class="text-muted">Czekamy na kolejną rundę...</p>
+    <div class="waiting-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<!-- FINAL (player) -->
+<div class="screen" id="screen-final-player">
+  <div class="logo">
+    <div class="logo-tag">KONIEC GRY</div>
+    <h1>🏆 FINAL<br><em>WYNIKI</em></h1>
+  </div>
+  <div class="card" id="final-scores-p"></div>
+  <div class="text-center"><p class="text-muted">Dziękujemy za grę! 🎉</p></div>
+</div>
+
+<!-- MOD SETUP -->
+<div class="screen" id="screen-mod-setup">
+  <div class="logo">
+    <div class="logo-tag">Panel Moderatora</div>
+    <h1>KTO TO<br><em>POWIEDZIAŁ?</em></h1>
+    <p>Skonfiguruj grę i udostępnij link graczom</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Pytania do gry</div>
+    <p class="text-muted" style="margin-bottom:14px;font-size:13px;">Edytuj lub usuń pytania. Możesz dodać własne.</p>
+    <div id="questions-editor"></div>
+    <div style="height:12px;"></div>
+    <button class="btn btn-ghost btn-sm" onclick="addQuestion()">+ Dodaj pytanie</button>
+  </div>
+  <button class="btn btn-primary btn-block" onclick="startLobby()">Otwórz lobby dla graczy →</button>
+</div>
+
+<!-- MOD LOBBY -->
+<div class="screen" id="screen-mod-lobby">
+  <div class="row">
+    <div class="pill pill-green"><span class="dot"></span> LOBBY OTWARTE</div>
+    <div class="flex-1"></div>
+    <button class="btn btn-ghost btn-sm" onclick="copyPlayerLink()">Kopiuj link graczy</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Link dla graczy</div>
+    <div class="link-box">
+      <span class="link-url" id="player-link-display"></span>
+      <button class="copy-btn" onclick="copyPlayerLink()">Kopiuj</button>
+    </div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-num" id="mod-player-count" style="color:var(--accent);">0</div>
+      <div class="stat-label">Graczy</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="mod-q-count" style="color:var(--accent3);">0</div>
+      <div class="stat-label">Pytań</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="mod-total-views" style="color:var(--gold);">0</div>
+      <div class="stat-label">Wejść</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="row" style="margin-bottom:14px;">
+      <div class="card-title" style="margin:0;flex:1;">Gracze w lobby</div>
+    </div>
+    <div class="player-grid" id="mod-players-grid"></div>
+    <div id="no-players-msg" class="text-muted" style="text-align:center;padding:20px;">Brak graczy – poczekaj aż dołączą...</div>
+  </div>
+  <button class="btn btn-primary btn-block" id="start-game-btn" onclick="startGame()" disabled>Start gry (min. 2 graczy)</button>
+</div>
+
+<!-- MOD GAME -->
+<div class="screen" id="screen-mod-game">
+  <div class="row">
+    <div class="pill pill-green"><span class="dot"></span> GRA W TOKU</div>
+    <div class="pill pill-blue" id="mod-q-counter">Pytanie 1/10</div>
+    <div class="flex-1"></div>
+    <button class="btn btn-ghost btn-sm" onclick="endGameNow()">Zakończ grę</button>
+  </div>
+  <div class="question-bubble">
+    <div class="question-num" id="mod-q-num-label">PYTANIE 01</div>
+    <div class="question-text" id="mod-q-text"></div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-num" id="mod-answered" style="color:var(--accent);">0</div>
+      <div class="stat-label">Odpowiedzi</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="mod-phase-label" style="color:var(--accent3);font-size:14px;">Pytanie</div>
+      <div class="stat-label">Faza</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="mod-voted" style="color:var(--gold);">0</div>
+      <div class="stat-label">Głosów</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Odpowiedzi graczy (tylko Ty to widzisz)</div>
+    <div class="answers-list" id="mod-answers-list"></div>
+    <div id="no-answers-msg" class="text-muted" style="text-align:center;padding:16px;">Czekam na odpowiedzi...</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <button class="btn btn-primary btn-block" id="btn-start-voting" onclick="startVoting()" style="display:none;">Otwórz głosowanie →</button>
+    <button class="btn btn-primary btn-block" id="btn-reveal"       onclick="revealAnswers()" style="display:none;">Ujawnij odpowiedzi →</button>
+    <button class="btn btn-ghost  btn-block" id="btn-show-scores"   onclick="doShowScores()" style="display:none;">Pokaż wyniki →</button>
+    <button class="btn btn-ghost  btn-block" id="btn-next-q"        onclick="nextQuestion()" style="display:none;">Następne pytanie →</button>
+    <button class="btn btn-primary btn-block" id="btn-end-final"    onclick="endGame()" style="display:none;">Zakończ i pokaż finał →</button>
+  </div>
+</div>
+
+<!-- MOD FINAL -->
+<div class="screen" id="screen-mod-final">
+  <div class="logo">
+    <div class="logo-tag">KONIEC GRY</div>
+    <h1>🏆 FINAL<br><em>WYNIKI</em></h1>
+  </div>
+  <div class="card" id="final-scores-mod"></div>
+  <button class="btn btn-ghost btn-block" onclick="resetGame()">Nowa gra →</button>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const JSONBIN_KEY = '$2a$10$uLkEdKrGm7GCl9BmgPi6Pe6Y8UH2u1YPY67RaIwAhi14ITFVQiwEa';
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
+const POLL_MS = 2500;
+
+const AVATAR_COLORS = [
+  ['#c8ff3e','#0d1a00'],['#6baaff','#001433'],['#ff6b6b','#330000'],
+  ['#ffcc44','#2d1f00'],['#b06bff','#1a0033'],['#6bffcc','#003326'],
+  ['#ff9f6b','#331500'],['#6bccff','#00202d'],['#ff6bcc','#2d001e'],
+  ['#ccff6b','#1a2d00']
+];
+
+const DEFAULT_QUESTIONS = [
+  "Jakie jest Twoje najbardziej zawstydzające guilty pleasure?",
+  "Gdybyś musiał/a jeść tylko jedno danie przez rok – co by to było?",
+  "Jaką nielogiczną fobię lub dziwactwo masz, o którym mało kto wie?",
+  "Co ostatnio googlowałeś/aś o 2 w nocy?",
+  "Jaką głupią umiejętność opanowałeś/aś do perfekcji?",
+  "Co robiłeś/aś jako dziecko, z czego teraz się wstydzisz?",
+  "Jaka jest Twoja najbardziej kontrowersyjna opinia na temat jedzenia?",
+  "Gdybyś był/a zwierzęciem – jakim i dlaczego (szczerze)?",
+  "Co kupiłeś/aś impulsywnie, czego żałujesz lub nie?",
+  "Czego nigdy nie robisz, mimo że wszyscy uważają że to normalne?",
+  "Jaką absurdalną zasadę masz w życiu, której trzymasz się kurczowo?",
+  "Jaki jest Twój najdziwniejszy nawyk przed snem?"
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let S = {
+  isMod: false,
+  binId: null,      // JSONBin bin ID
+  gameId: null,     // short id in URL
+  playerId: null,
+  playerName: null,
+  playerNum: null,
+  screen: 'loading',
+  pollTimer: null,
+  lastPhase: null,
+  lastQIdx: null,
+  myAnsweredQ: {},  // qIdx -> true
+  myVotedQ: {},     // qIdx -> true
+};
+
+// ─────────────────────────────────────────────
+// JSONBIN API
+// ─────────────────────────────────────────────
+async function binCreate(data) {
+  const r = await fetch(`${JSONBIN_BASE}/b`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JSONBIN_KEY,
+      'X-Bin-Private': 'false',
+    },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('binCreate failed: ' + r.status);
+  const j = await r.json();
+  return j.metadata.id;
+}
+
+async function binGet(id) {
+  const r = await fetch(`${JSONBIN_BASE}/b/${id}/latest`, {
+    headers: { 'X-Master-Key': JSONBIN_KEY }
+  });
+  if (!r.ok) return null;
+  const j = await r.json();
+  return j.record;
+}
+
+async function binPut(id, data) {
+  const r = await fetch(`${JSONBIN_BASE}/b/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JSONBIN_KEY,
+    },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('binPut failed: ' + r.status);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', init);
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const isMod = params.get('mod') === '1';
+  const binId  = params.get('b');
+
+  S.isMod = isMod;
+  S.binId  = binId || null;
+
+  if (!binId && !isMod) {
+    // Plain URL with no params → landing
+    showScreen('landing');
+    return;
+  }
+
+  if (isMod && !binId) {
+    // Moderator – fresh setup
+    showModSetup();
+    return;
+  }
+
+  // Has binId → either mod returning or player
+  setLoadingMsg('Łączę z grą...');
+  const gs = await binGet(binId);
+  if (!gs) {
+    showError('Gra nie istnieje lub link jest nieprawidłowy.');
+    return;
+  }
+
+  // Track view
+  gs.totalViews = (gs.totalViews || 0) + 1;
+  await binPut(binId, gs).catch(() => {});
+
+  if (isMod) {
+    // Returning mod
+    if (gs.phase === 'lobby') showModLobby(gs);
+    else showModGame(gs);
+  } else {
+    // Player
+    const savedId = sessionStorage.getItem('pid_' + binId);
+    if (savedId && gs.players && gs.players[savedId]) {
+      S.playerId   = savedId;
+      S.playerName = gs.players[savedId].name;
+      S.playerNum  = gs.players[savedId].num;
+      goToPhase(gs);
+    } else {
+      if (gs.phase !== 'lobby') {
+        showError('Gra już trwa – nie można dołączyć po starcie.');
+        return;
+      }
+      showScreen('join');
+    }
+    startPolling(pollPlayer);
+  }
+}
+
+function setLoadingMsg(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+}
+
+function showError(msg) {
+  showScreen('landing');
+  document.getElementById('screen-landing').innerHTML = `
+    <div class="logo">
+      <div class="logo-tag">Błąd</div>
+      <h1>Coś poszło<br><em>nie tak</em></h1>
+      <p>${msg}</p>
+    </div>
+    <button class="btn btn-ghost btn-block" onclick="window.location.href=window.location.pathname">Wróć →</button>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// LANDING
+// ─────────────────────────────────────────────
+function goMod() {
+  const url = new URL(window.location.href);
+  url.search = '?mod=1';
+  window.location.href = url.toString();
+}
+
+// ─────────────────────────────────────────────
+// MOD SETUP
+// ─────────────────────────────────────────────
+function showModSetup() {
+  showScreen('mod-setup');
+  renderQuestionsEditor(DEFAULT_QUESTIONS.slice(0, 10));
+}
+
+function renderQuestionsEditor(questions) {
+  const el = document.getElementById('questions-editor');
+  el.innerHTML = '';
+  questions.forEach((q, i) => addQRow(el, q, i + 1));
+}
+
+function addQRow(container, val, num) {
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;';
+  div.innerHTML = `
+    <span class="q-num-label" style="color:var(--muted);font-family:DM Mono,monospace;font-size:12px;margin-top:16px;min-width:20px;">${String(num).padStart(2,'0')}</span>
+    <input type="text" value="${escHtml(val)}" class="q-input" placeholder="Wpisz pytanie..." />
+    <button onclick="removeQuestion(this)" style="background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);color:var(--accent2);border-radius:8px;padding:8px 10px;cursor:pointer;margin-top:6px;font-size:14px;font-family:Syne,sans-serif;">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+function addQuestion() {
+  const el = document.getElementById('questions-editor');
+  addQRow(el, '', el.children.length + 1);
+}
+
+function removeQuestion(btn) {
+  btn.parentElement.remove();
+  document.querySelectorAll('#questions-editor .q-num-label').forEach((s, i) => {
+    s.textContent = String(i + 1).padStart(2, '0');
+  });
+}
+
+function getQuestionsFromEditor() {
+  return Array.from(document.querySelectorAll('.q-input'))
+    .map(i => i.value.trim()).filter(q => q.length > 0);
+}
+
+async function startLobby() {
+  const questions = getQuestionsFromEditor();
+  if (questions.length < 2) { showToast('Dodaj co najmniej 2 pytania!'); return; }
+
+  setLoadingMsg('Tworzę sesję gry...');
+  showScreen('loading');
+
+  const gs = {
+    phase: 'lobby',
+    currentQ: 0,
+    questions,
+    players: {},
+    answers: {},
+    votes: {},
+    totalViews: 0,
+    createdAt: Date.now()
+  };
+
+  try {
+    const binId = await binCreate(gs);
+    S.binId = binId;
+
+    // Redirect mod to URL with binId
+    const url = new URL(window.location.href);
+    url.search = `?mod=1&b=${binId}`;
+    window.history.replaceState({}, '', url.toString());
+
+    showModLobby(gs);
+  } catch(e) {
+    showToast('Błąd tworzenia gry: ' + e.message);
+    showModSetup();
+  }
+}
+
+// ─────────────────────────────────────────────
+// MOD LOBBY
+// ─────────────────────────────────────────────
+function showModLobby(gs) {
+  showScreen('mod-lobby');
+  document.getElementById('mod-q-count').textContent = gs.questions.length;
+
+  const url = new URL(window.location.href);
+  url.search = `?b=${S.binId}`;
+  const playerUrl = url.toString();
+  document.getElementById('player-link-display').textContent = playerUrl;
+
+  updateModLobby(gs);
+  startPolling(pollModLobby);
+}
+
+async function pollModLobby() {
+  const gs = await binGet(S.binId);
+  if (!gs) return;
+  updateModLobby(gs);
+  if (gs.phase !== 'lobby') { stopPolling(); showModGame(gs); }
+}
+
+function updateModLobby(gs) {
+  const players = Object.values(gs.players || {});
+  document.getElementById('mod-player-count').textContent = players.length;
+  document.getElementById('mod-total-views').textContent  = gs.totalViews || 0;
+
+  const grid  = document.getElementById('mod-players-grid');
+  const noMsg = document.getElementById('no-players-msg');
+  if (players.length === 0) {
+    grid.innerHTML = '';
+    noMsg.style.display = 'block';
+  } else {
+    noMsg.style.display = 'none';
+    grid.innerHTML = players.map(playerChipHTML).join('');
+  }
+
+  const btn = document.getElementById('start-game-btn');
+  btn.disabled = players.length < 2;
+  btn.textContent = players.length < 2
+    ? 'Start gry (min. 2 graczy)'
+    : `Start gry (${players.length} graczy) →`;
+}
+
+async function startGame() {
+  stopPolling();
+  const gs = await binGet(S.binId);
+  gs.phase = 'question';
+  gs.currentQ = 0;
+  await binPut(S.binId, gs);
+  showModGame(gs);
+}
+
+// ─────────────────────────────────────────────
+// MOD GAME
+// ─────────────────────────────────────────────
+function showModGame(gs) {
+  showScreen('mod-game');
+  renderModGame(gs);
+  startPolling(pollModGame);
+}
+
+async function pollModGame() {
+  const gs = await binGet(S.binId);
+  if (!gs) return;
+  renderModGame(gs);
+}
+
+function renderModGame(gs) {
+  const qi      = gs.currentQ;
+  const q       = gs.questions[qi];
+  const players = Object.values(gs.players || {});
+  const answers = gs.answers[qi] || {};
+  const votes   = gs.votes[qi]   || {};
+
+  document.getElementById('mod-q-counter').textContent   = `Pytanie ${qi+1}/${gs.questions.length}`;
+  document.getElementById('mod-q-num-label').textContent = `PYTANIE ${pad(qi+1)}`;
+  document.getElementById('mod-q-text').textContent      = q;
+  document.getElementById('mod-phase-label').textContent = phaseLabel(gs.phase);
+  document.getElementById('mod-answered').textContent    = Object.keys(answers).length;
+  document.getElementById('mod-voted').textContent       = Object.keys(votes).length;
+
+  // Answers list (mod sees real names)
+  const list  = document.getElementById('mod-answers-list');
+  const noAns = document.getElementById('no-answers-msg');
+  const ansArr = Object.entries(answers);
+  if (ansArr.length === 0) {
+    list.innerHTML = '';
+    noAns.style.display = 'block';
+  } else {
+    noAns.style.display = 'none';
+    list.innerHTML = ansArr.map(([pid, text]) => {
+      const p  = gs.players[pid];
+      const [bg] = avatarColor(p?.num);
+      return `<div class="answer-item">
+        <div class="answer-badge" style="background:${bg}25;color:${bg};">#${pad(p?.num||0)}</div>
+        <div class="flex-1">
+          <div class="answer-text">${escHtml(text)}</div>
+          <div class="answer-author">${p?.name || '?'}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Buttons
+  el('btn-start-voting').style.display = 'none';
+  el('btn-reveal').style.display       = 'none';
+  el('btn-show-scores').style.display  = 'none';
+  el('btn-next-q').style.display       = 'none';
+  el('btn-end-final').style.display    = 'none';
+
+  if (gs.phase === 'question' && ansArr.length >= 2) {
+    el('btn-start-voting').style.display = 'flex';
+  }
+  if (gs.phase === 'voting' && Object.keys(votes).length >= 1) {
+    el('btn-reveal').style.display = 'flex';
+  }
+  if (gs.phase === 'reveal') {
+    if (qi + 1 < gs.questions.length) {
+      el('btn-show-scores').style.display = 'flex';
+      el('btn-next-q').style.display      = 'flex';
+    } else {
+      el('btn-end-final').style.display = 'flex';
+    }
+  }
+  if (gs.phase === 'scores') {
+    if (qi + 1 < gs.questions.length) {
+      el('btn-next-q').style.display = 'flex';
+    } else {
+      el('btn-end-final').style.display = 'flex';
+    }
+  }
+}
+
+async function startVoting() {
+  const gs = await binGet(S.binId);
+  gs.phase = 'voting';
+  await binPut(S.binId, gs);
+  renderModGame(gs);
+}
+
+async function revealAnswers() {
+  const gs = await binGet(S.binId);
+  gs.phase = 'reveal';
+  await binPut(S.binId, gs);
+  renderModGame(gs);
+}
+
+async function doShowScores() {
+  const gs = await binGet(S.binId);
+  calcScores(gs);
+  gs.phase = 'scores';
+  await binPut(S.binId, gs);
+  renderModGame(gs);
+}
+
+function calcScores(gs) {
+  const qi      = gs.currentQ;
+  const answers = gs.answers[qi] || {};
+  const votes   = gs.votes[qi]   || {};
+
+  // +1 for correct guess, +1 for each wrong vote you received
+  Object.entries(votes).forEach(([voterId, targetId]) => {
+    if (!targetId || voterId === targetId) return;
+    const isCorrect = answers[targetId] !== undefined;
+    if (isCorrect) {
+      // voter guessed right
+      if (gs.players[voterId]) gs.players[voterId].score = (gs.players[voterId].score || 0) + 1;
+    } else {
+      // targetId got a fool point
+      if (gs.players[targetId]) gs.players[targetId].score = (gs.players[targetId].score || 0) + 1;
+    }
+  });
+}
+
+async function nextQuestion() {
+  const gs = await binGet(S.binId);
+  gs.currentQ += 1;
+  gs.phase = 'question';
+  await binPut(S.binId, gs);
+  renderModGame(gs);
+}
+
+async function endGame() {
+  stopPolling();
+  const gs = await binGet(S.binId);
+  calcScores(gs);
+  gs.phase = 'final';
+  await binPut(S.binId, gs);
+  showScreen('mod-final');
+  document.getElementById('final-scores-mod').innerHTML = renderScoresList(gs);
+}
+
+async function endGameNow() {
+  if (!confirm('Na pewno zakończyć grę?')) return;
+  await endGame();
+}
+
+async function resetGame() {
+  window.location.href = window.location.pathname + '?mod=1';
+}
+
+// ─────────────────────────────────────────────
+// PLAYER JOIN
+// ─────────────────────────────────────────────
+async function joinGame() {
+  const name = document.getElementById('player-name-input').value.trim();
+  if (!name) { showToast('Wpisz swoje imię!'); return; }
+
+  const gs = await binGet(S.binId);
+  if (!gs) { showToast('Nie można połączyć z grą.'); return; }
+  if (gs.phase !== 'lobby') { showError('Gra już trwa – nie można dołączyć.'); return; }
+
+  // Assign unique number
+  const taken = Object.values(gs.players).map(p => p.num);
+  let num = 1;
+  while (taken.includes(num)) num++;
+
+  S.playerId   = 'p_' + Math.random().toString(36).slice(2, 10);
+  S.playerName = name;
+  S.playerNum  = num;
+
+  gs.players[S.playerId] = { name, num, score: 0 };
+  await binPut(S.binId, gs);
+
+  sessionStorage.setItem('pid_' + S.binId, S.playerId);
+
+  goToPhase(gs);
+}
+
+// ─────────────────────────────────────────────
+// PLAYER POLLING
+// ─────────────────────────────────────────────
+async function pollPlayer() {
+  const gs = await binGet(S.binId);
+  if (!gs) return;
+  goToPhase(gs);
+}
+
+function goToPhase(gs) {
+  switch (gs.phase) {
+    case 'lobby':    showPlayerWaiting(gs); break;
+    case 'question': showPlayerQuestion(gs); break;
+    case 'voting':   showPlayerVoting(gs); break;
+    case 'reveal':   showPlayerReveal(gs); break;
+    case 'scores':   showPlayerScores(gs); break;
+    case 'final':    showPlayerFinal(gs); break;
+  }
+}
+
+// ─────────────────────────────────────────────
+// PLAYER SCREENS
+// ─────────────────────────────────────────────
+function showPlayerWaiting(gs) {
+  const players = Object.values(gs.players || {});
+  if (S.screen !== 'waiting') {
+    showScreen('waiting');
+  }
+  document.getElementById('waiting-count').textContent   = players.length;
+  document.getElementById('waiting-players').innerHTML   = players.map(playerChipHTML).join('');
+}
+
+function showPlayerQuestion(gs) {
+  const qi      = gs.currentQ;
+  const answers = gs.answers[qi] || {};
+  const myDone  = answers[S.playerId] !== undefined;
+
+  if (S.screen !== 'question' || S.lastQIdx !== qi) {
+    showScreen('question');
+    S.lastQIdx = qi;
+    document.getElementById('q-counter-pill').textContent  = `Pytanie ${qi+1}/${gs.questions.length}`;
+    document.getElementById('q-num-label').textContent     = `PYTANIE ${pad(qi+1)}`;
+    document.getElementById('q-text').textContent          = gs.questions[qi];
+    document.getElementById('my-num-pill').textContent     = `Ty: #${pad(S.playerNum)}`;
+    el('answer-section').style.display      = myDone ? 'none' : 'block';
+    el('answer-sent-section').style.display = myDone ? 'block' : 'none';
+    if (!myDone) document.getElementById('player-answer').value = '';
+  }
+
+  if (myDone) {
+    const total = Object.keys(gs.players).length;
+    const cnt   = Object.keys(answers).length;
+    document.getElementById('answers-so-far').textContent = `${cnt} z ${total} odpowiedziało`;
+  }
+}
+
+async function submitAnswer() {
+  const text = document.getElementById('player-answer').value.trim();
+  if (!text) { showToast('Napisz odpowiedź!'); return; }
+
+  el('submit-answer-btn').disabled = true;
+  const gs = await binGet(S.binId);
+  const qi = gs.currentQ;
+  if (!gs.answers[qi]) gs.answers[qi] = {};
+  gs.answers[qi][S.playerId] = text;
+  await binPut(S.binId, gs);
+
+  el('answer-section').style.display      = 'none';
+  el('answer-sent-section').style.display = 'block';
+  showToast('Odpowiedź wysłana! ✓');
+  el('submit-answer-btn').disabled = false;
+}
+
+function showPlayerVoting(gs) {
+  const qi    = gs.currentQ;
+  const votes = gs.votes[qi] || {};
+  const myVote = votes[S.playerId];
+
+  if (S.screen !== 'voting' || S.lastQIdx !== qi) {
+    showScreen('voting');
+    S.lastQIdx = qi;
+    document.getElementById('v-q-num').textContent     = `PYTANIE ${pad(qi+1)}`;
+    document.getElementById('v-q-text').textContent    = gs.questions[qi];
+    document.getElementById('my-num-pill-v').textContent = `Ty: #${pad(S.playerNum)}`;
+  }
+
+  if (myVote) {
+    el('voting-card').style.display   = 'none';
+    el('voted-section').style.display = 'block';
+    return;
+  }
+
+  el('voting-card').style.display   = 'block';
+  el('voted-section').style.display = 'none';
+
+  // Build options – other players' answers, anonymized by number
+  const answers = gs.answers[qi] || {};
+  const others  = Object.entries(answers).filter(([pid]) => pid !== S.playerId);
+
+  document.getElementById('vote-options').innerHTML = others.map(([pid, text]) => {
+    const p    = gs.players[pid];
+    const [bg] = avatarColor(p?.num);
+    return `<button class="vote-option" onclick="castVote('${pid}')">
+      <div style="background:${bg}25;color:${bg};border-radius:8px;min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:DM Mono,monospace;font-size:12px;font-weight:700;flex-shrink:0;">#${pad(p?.num||0)}</div>
+      <div class="vote-answer-text">${escHtml(text)}</div>
+    </button>`;
+  }).join('');
+}
+
+async function castVote(targetId) {
+  const gs = await binGet(S.binId);
+  const qi = gs.currentQ;
+  if (!gs.votes[qi]) gs.votes[qi] = {};
+  gs.votes[qi][S.playerId] = targetId;
+  await binPut(S.binId, gs);
+
+  el('voting-card').style.display   = 'none';
+  el('voted-section').style.display = 'block';
+  showToast('Głos oddany! 🗳️');
+}
+
+function showPlayerReveal(gs) {
+  const qi = gs.currentQ;
+  if (S.screen === 'reveal' && S.lastQIdx === qi) return;
+  showScreen('reveal');
+  S.lastQIdx = qi;
+
+  document.getElementById('r-q-num').textContent  = `PYTANIE ${pad(qi+1)}`;
+  document.getElementById('r-q-text').textContent = gs.questions[qi];
+
+  const answers = gs.answers[qi] || {};
+  const votes   = gs.votes[qi]   || {};
+
+  document.getElementById('reveal-list').innerHTML = Object.entries(answers).map(([pid, text]) => {
+    const p = gs.players[pid];
+    const [bg, fg] = avatarColor(p?.num);
+    const isMine = pid === S.playerId;
+    const whoVoted = Object.entries(votes)
+      .filter(([, t]) => t === pid)
+      .map(([vid]) => {
+        const vp = gs.players[vid];
+        return `<span class="vote-chip">#${pad(vp?.num||0)}</span>`;
+      });
+    return `<div class="reveal-item ${isMine?'is-mine':''}">
+      <div style="background:${bg};color:${fg};border-radius:8px;min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">${(p?.name||'?').charAt(0).toUpperCase()}</div>
+      <div class="flex-1">
+        <div style="font-size:14px;font-weight:700;margin-bottom:2px;">${p?.name||'?'} <span style="color:var(--muted);font-size:12px;font-family:DM Mono,monospace;">#${pad(p?.num||0)}</span></div>
+        <div class="answer-text" style="font-size:14px;">${escHtml(text)}</div>
+        <div class="reveal-votes" style="margin-top:8px;">
+          ${whoVoted.length ? '<span style="font-size:11px;color:var(--muted);margin-right:4px;">Zgadli:</span>' + whoVoted.join('') : '<span style="font-size:11px;color:var(--muted);">Nikt nie wytypował tej osoby</span>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showPlayerScores(gs) {
+  if (S.screen === 'scores' && S.lastQIdx === gs.currentQ) return;
+  showScreen('scores');
+  S.lastQIdx = gs.currentQ;
+  document.getElementById('scores-list-p').innerHTML = renderScoresList(gs);
+}
+
+function showPlayerFinal(gs) {
+  if (S.screen === 'final-player') return;
+  showScreen('final-player');
+  document.getElementById('final-scores-p').innerHTML = renderScoresList(gs);
+  stopPolling();
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function renderScoresList(gs) {
+  const players = Object.values(gs.players || {}).sort((a,b)=>(b.score||0)-(a.score||0));
+  const max = Math.max(...players.map(p=>p.score||0), 1);
+  const medals = ['🥇','🥈','🥉'];
+  return `<div class="card-title" style="margin-bottom:16px;">Wyniki</div>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+  ${players.map((p,i) => {
+    const [bg] = avatarColor(p.num);
+    const pct  = Math.round(((p.score||0)/max)*100);
+    return `<div class="score-row">
+      <div class="score-rank ${i<3?'top':''}">${i<3 ? medals[i] : (i+1)+'.'}</div>
+      <div style="background:${bg}25;color:${bg};width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">${p.name.charAt(0).toUpperCase()}</div>
+      <div class="score-bar-wrap">
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">${p.name}</div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:${pct}%;"></div></div>
+      </div>
+      <div class="score-pts">${p.score||0}</div>
+    </div>`;
+  }).join('')}
+  </div>`;
+}
+
+function playerChipHTML(p) {
+  const [bg, fg] = avatarColor(p.num);
+  return `<div class="player-chip">
+    <div class="player-avatar" style="background:${bg};color:${fg};">${p.name.charAt(0).toUpperCase()}</div>
+    <div>
+      <div class="player-name">${escHtml(p.name)}</div>
+      <div class="player-num">#${pad(p.num)}</div>
+    </div>
+  </div>`;
+}
+
+function avatarColor(num) {
+  return AVATAR_COLORS[((num||1)-1) % AVATAR_COLORS.length];
+}
+
+function phaseLabel(phase) {
+  return {lobby:'Lobby',question:'Pytanie',voting:'Głosowanie',reveal:'Ujawnienie',scores:'Wyniki',final:'Finał'}[phase]||phase;
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function el(id) { return document.getElementById(id); }
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const e = document.getElementById('screen-' + name);
+  if (e) e.classList.add('active');
+  S.screen = name;
+}
+
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function copyPlayerLink() {
+  const url = new URL(window.location.href);
+  url.search = `?b=${S.binId}`;
+  navigator.clipboard.writeText(url.toString())
+    .then(() => showToast('Link skopiowany! 📋'))
+    .catch(() => showToast(url.toString()));
+}
+
+function startPolling(fn) {
+  stopPolling();
+  fn();
+  S.pollTimer = setInterval(fn, POLL_MS);
+}
+
+function stopPolling() {
+  if (S.pollTimer) clearInterval(S.pollTimer);
+  S.pollTimer = null;
+}
+
+// ─────────────────────────────────────────────
+// LINK HELPER (expose player link in lobby)
+// ─────────────────────────────────────────────
+function getPlayerLink() {
+  const url = new URL(window.location.href);
+  url.search = `?b=${S.binId}`;
+  return url.toString();
+}
+</script>
+</body>
+</html>
